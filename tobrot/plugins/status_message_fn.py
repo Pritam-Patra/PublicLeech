@@ -2,20 +2,12 @@
 # -*- coding: utf-8 -*-
 # (c) Shrimadhav U K
 
-# the logging things
-import logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logging.getLogger("pyrogram").setLevel(logging.WARNING)
-LOGGER = logging.getLogger(__name__)
-
 import asyncio
 import os
 import time
 
 from tobrot import (
+    LOGGER,
     MAX_MESSAGE_LENGTH
 )
 
@@ -23,6 +15,7 @@ from tobrot import (
 from tobrot.helper_funcs.admin_check import AdminCheck
 from tobrot.helper_funcs.download_aria_p_n import call_apropriate_function, aria_start
 from tobrot.helper_funcs.upload_to_tg import upload_to_tg
+from tobrot.dinmamoc import Commandi
 
 
 async def status_message_f(client, message):
@@ -63,7 +56,7 @@ async def status_message_f(client, message):
             msg += " | "
             msg += f"{download_current_status}"
             msg += " | "
-            msg += f"<code>/cancel {current_gid}</code>"
+            msg += f"<code>{Commandi.CANCEL} {current_gid}</code>"
             msg += " | "
             msg += "\n\n"
         LOGGER.info(msg)
@@ -153,3 +146,22 @@ async def upload_document_f(client, message):
             )
             LOGGER.info(recvd_response)
     await imsegd.delete()
+
+
+async def save_rclone_conf_f(client, message):
+    chat_type = message.chat.type
+    r_clone_conf_uri = None
+    if chat_type in ["private", "bot", "group"]:
+        r_clone_conf_uri = f"https://t.me/PublicLeech/{message.chat.id}/{message.reply_to_message.message_id}"
+    elif chat_type in ["supergroup", "channel"]:
+        if message.chat.username:
+            r_clone_conf_uri = "please DO NOT upload confidential credentials, in a public group."
+        else:
+            r_clone_conf_uri = f"https://t.me/c/{str(message.reply_to_message.chat.id)[4:]}/{message.reply_to_message.message_id}"
+    else:
+        r_clone_conf_uri = "unknown chat_type"
+    await message.reply_text(
+        "<code>"
+        f"{r_clone_conf_uri}"
+        "</code>"
+    )
